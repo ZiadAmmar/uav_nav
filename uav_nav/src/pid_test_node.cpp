@@ -4,6 +4,7 @@
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/CommandBool.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <cmath>
 
 class PIDTester {
 private:
@@ -26,14 +27,16 @@ private:
     // Test parameters
     std::vector<geometry_msgs::PoseStamped> test_positions_;
     int current_position_index_;
-    ros::Time position_start_time_;
-    double position_hold_time_;
-
-    //Flags
+    
+    // Position tracking parameters
+    const float POSITION_THRESHOLD = 0.1;  // meters
+    const float STABLE_DURATION = 2.0;     // seconds
+    ros::Time position_reached_time_;
+    bool position_reached_;
     bool initial_takeoff_done_;
     
 public:
-    PIDTester() : current_position_index_(0), initial_takeoff_done_(false) {
+    PIDTester() : current_position_index_(0), position_reached_(false), initial_takeoff_done_(false) {
         // Initialize ROS communications
         local_pos_pub_ = nh_.advertise<geometry_msgs::PoseStamped>
             ("mavros/setpoint_position/local", 10);
@@ -49,14 +52,27 @@ public:
             
         // Set up test positions
         setupTestPositions();
+    }
+    
+    // Check if current position matches target position within threshold
+    bool hasReachedPosition(const geometry_msgs::PoseStamped& target) {
+        double dx = current_pose_.pose.position.x - target.pose.position.x;
+        double dy = current_pose_.pose.position.y - target.pose.position.y;
+        double dz = current_pose_.pose.position.z - target.pose.position.z;
         
-        // Set initial PID gains (For tuning then modify the default values after)
-        // pid_controller_.setGains(11.0f, 0.025f, 3.0f, 'x');  
-        // pid_controller_.setGains(12.0f, 0.027f, 6.0f, 'y');
-        // pid_controller_.setGains(10.7f, 0.02025f, 5.13f, 'z');
+        double distance = sqrt(dx*dx + dy*dy + dz*dz);
         
-        position_hold_time_ = 20.0; // Hold each position for 20 seconds
-        position_start_time_ = ros::Time::now();
+        if (distance < POSITION_THRESHOLD) {
+            if (!position_reached_) {
+                position_reached_ = true;
+                position_reached_time_ = ros::Time::now();
+            }
+            // Check if position has been maintained for STABLE_DURATION
+            return (ros::Time::now() - position_reached_time_).toSec() >= STABLE_DURATION;
+        }
+        
+        position_reached_ = false;
+        return false;
     }
     
     void setupTestPositions() {
@@ -117,16 +133,17 @@ public:
     
     void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg) {
         current_pose_ = *msg;
-        // Print current position for debugging and tunning
-        ROS_INFO_THROTTLE(1.0, "Current Position - X: %.2f, Y: %.2f, Z: %.2f",
+        
+        // Print current position and target position for debugging
+        ROS_INFO_THROTTLE(1.0, "Current Position  - X: %.3f, Y: %.3f, Z: %.3f",
             current_pose_.pose.position.x,
             current_pose_.pose.position.y,
             current_pose_.pose.position.z);
-        // ROS_INFO_THROTTLE(1.0, "Current Position X: %.3f", current_pose_.pose.position.x);
-        // ROS_INFO_THROTTLE(1.0, "Current Position Y: %.3f", current_pose_.pose.position.y);
-        // ROS_INFO_THROTTLE(1.0, "Current Position Z: %.3f", current_pose_.pose.position.z);
-        ROS_INFO_THROTTLE(1.0, "-----------------");
-
+            
+        ROS_INFO_THROTTLE(1.0, "Target Position   - X: %.3f, Y: %.3f, Z: %.3f",
+            test_positions_[current_position_index_].pose.position.x,
+            test_positions_[current_position_index_].pose.position.y,
+            test_positions_[current_position_index_].pose.position.z);
     }
     
     void run() {
@@ -156,7 +173,7 @@ public:
         ros::Time last_request = ros::Time::now();
         
         while(ros::ok()) {
-            // Try to switch to offboard mode
+            // Try to switch to offboard mode and arm
             if(current_state_.mode != "OFFBOARD" &&
                 (ros::Time::now() - last_request > ros::Duration(5.0))) {
                 if(set_mode_client_.call(offb_set_mode) &&
@@ -172,19 +189,19 @@ public:
                 last_request = ros::Time::now();
             }
             
-            // Check if it's time to move to next position
-            if(ros::Time::now() - position_start_time_ > ros::Duration(position_hold_time_)) {
+            // Check if current position is reached
+            if(hasReachedPosition(test_positions_[current_position_index_])) {
                 if (!initial_takeoff_done_) {
-                        // After the first hold, set flag and move to the next position
-                        initial_takeoff_done_   = true;
-                        current_position_index_ = 0;
-                    } else {
-                        // Normal position increment
-                        current_position_index_ = (current_position_index_ + 1) % test_positions_.size();
-                    }                
-                position_start_time_ = ros::Time::now();
-                ROS_INFO("-----------------------------------------------");
-                ROS_INFO("Moving to position %d", current_position_index_);
+                    // After successful takeoff, move to first waypoint
+                    initial_takeoff_done_ = true;
+                    current_position_index_ = 1;  // Start with first waypoint after takeoff
+                    ROS_INFO("Takeoff complete, moving to first waypoint");
+                } else {
+                    // Move to next position
+                    current_position_index_ = (current_position_index_ + 1) % test_positions_.size();
+                    ROS_INFO("Position reached, moving to position %d", current_position_index_);
+                }
+                position_reached_ = false;  // Reset for next position
             }
             
             // Compute PID control command
@@ -194,7 +211,7 @@ public:
                 
             // Publish setpoint
             local_pos_pub_.publish(setpoint);
-                           
+            
             ros::spinOnce();
             rate.sleep();
         }
