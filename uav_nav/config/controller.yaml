@@ -1,0 +1,37 @@
+# Controller Parameters
+#TODO: If there is time, use plotjuggler to help tuning the PID Controller
+pid_control:
+  enabled: false # Set to false for debugging - default: true
+  # PID gains
+  x:
+    kp: 11.0
+    ki: 0.025
+    kd: 3.0
+  y:
+    kp: 12.0
+    ki: 0.027
+    kd: 6.0
+  z:
+    kp: 10.7
+    ki: 0.02025
+    kd: 5.13
+  deadband: 0.05  # 5cm
+  # Maximum error limits
+  max_error:
+    x: 1.0
+    y: 1.0
+    z: 0.7
+  # Maximum integral limits
+  max_integral:
+    x: 1.0
+    y: 1.0
+    z: 0.1
+  # Integral threshold
+  integral_threshold: 0.2
+  # Maximum derivative limits
+  max_derivative:
+    x: 4.0
+    y: 4.0
+    z: 1.0
+  # Derivative filter coefficient
+  derivative_filter_alpha: 0.7

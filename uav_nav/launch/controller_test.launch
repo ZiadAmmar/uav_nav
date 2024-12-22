@@ -1,0 +1,7 @@
+<launch>
+
+    <rosparam command="load" file="$(find uav_nav)/config/controller.yaml" />
+
+    <node name="pid_test_node" pkg="uav_nav" type="pid_test_node" output="screen"/>
+
+</launch>

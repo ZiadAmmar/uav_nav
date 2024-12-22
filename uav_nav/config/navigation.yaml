@@ -1,0 +1,5 @@
+# Mission Parameters
+mission:
+  takeoff_altitude: 1.5
+  waypoint_tolerance: 0.1
+  holding_time: 15.0

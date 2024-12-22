@@ -1,0 +1,27 @@
+<launch>
+    <!-- Load parameters -->
+    <rosparam command="load" file="$(find uav_nav)/config/navigation.yaml" />
+    <rosparam command="load" file="$(find uav_nav)/config/controller.yaml" />
+    
+    <!-- Launch Fast Planner using kino_replan -->
+    <include file="$(find uav_nav)/launch/kino_replan.launch">
+        <remap from="/odom_world" to="/mavros/local_position/pose" />
+        <remap from="/position_cmd" to="/fast_planner/position_cmd" />
+    </include>
+
+    <!-- For Map Visualization -->
+    <!-- Run Map server node  -->
+    <arg name="map_file" default="$(find uav_nav)/maps/map.yaml"/>
+    <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+    <!-- Fix Tf tree -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="world_to_map" args="0 0 0 0 0 0 1 /world /map" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom" args="0 0 0 0 0 0 1 /map /odom" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="odom_to_baselink" args="0 0 0 0 0 0 1 /odom /base_link" />
+
+    <!-- Rviz Visualization -->
+    <node name="rviz_visualization" pkg="rviz" type="rviz" output="log" args="-d $(find uav_nav)/rviz/uav_config.rviz" />
+
+    <!-- Launch UAV Navigation Node -->
+    <node name="uav_navigation_node" pkg="uav_nav" type="uav_navigation_node" output="screen"/>
+    
+</launch>
