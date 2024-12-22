@@ -1,7 +1,7 @@
 # Controller Parameters
 #TODO: If there is time, use plotjuggler to help tuning the PID Controller
 pid_control:
-  enabled: false # Set to false for debugging - default: true
+  enabled: true # Set to false for debugging - default: true
   # PID gains
   x:
     kp: 11.0
