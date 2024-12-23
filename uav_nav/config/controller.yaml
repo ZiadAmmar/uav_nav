@@ -2,6 +2,7 @@
 #TODO: If there is time, use plotjuggler to help tuning the PID Controller
 pid_control:
   enabled: true # Set to false for debugging - default: true
+  debug: false # Flag for enable printing control ouputs for debugging
   # PID gains
   x:
     kp: 11.0

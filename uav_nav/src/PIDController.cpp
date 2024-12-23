@@ -16,6 +16,7 @@ void PIDController::loadParameters() {
     getAxisGains("z", z_gains_);
 
     // Load control parameters with default values
+    nh_.param<bool>("pid_control/debug", debug_, false);
     nh_.param<double>("pid_control/deadband", deadband_, 0.05);
     
     // Error limits
@@ -89,12 +90,13 @@ geometry_msgs::PoseStamped PIDController::computeControlCommand(
     double z_error = target_pose.pose.position.z - current_pose.pose.position.z;
     
     // Print errors for debugging and tunning
-    // ROS_INFO_THROTTLE(1.0, "Position errors - X: %.3f, Y: %.3f, Z: %.3f", 
-    //                  x_error, y_error, z_error);
-    // ROS_INFO_THROTTLE(1.0, "Position errors X: %.4f", x_error);
-    // ROS_INFO_THROTTLE(1.0, "Position errors Y: %.4f", y_error);
-    // ROS_INFO_THROTTLE(1.0, "Position errors Z: %.4f", z_error);
-
+    if(debug_){
+        ROS_INFO_THROTTLE(1.0, "Position errors - X: %.3f, Y: %.3f, Z: %.3f", 
+                        x_error, y_error, z_error);
+        ROS_INFO_THROTTLE(1.0, "Position errors X: %.4f", x_error);
+        ROS_INFO_THROTTLE(1.0, "Position errors Y: %.4f", y_error);
+        ROS_INFO_THROTTLE(1.0, "Position errors Z: %.4f", z_error);
+    }
     // Reset integral when in deadband
     if (std::abs(x_error) < deadband_) {
         x_error = 0.0;
@@ -171,12 +173,13 @@ geometry_msgs::PoseStamped PIDController::computeControlCommand(
                      z_gains_.kd * z_derivative;
 
     // Print control outputs for debugging and tuning
-    // ROS_INFO_THROTTLE(1.0, "Control outputs - X: %.3f, Y: %.3f, Z: %.3f",
-    //                  x_output, y_output, z_output);
-    // ROS_INFO_THROTTLE(1.0, "Control outputs X: %.3f", x_output);
-    // ROS_INFO_THROTTLE(1.0, "Control outputs Y: %.3f", y_output);
-    // ROS_INFO_THROTTLE(1.0, "Control outputs Z: %.3f", z_output);
-
+    if(debug_){
+        ROS_INFO_THROTTLE(1.0, "Control outputs - X: %.3f, Y: %.3f, Z: %.3f",
+                        x_output, y_output, z_output);
+        ROS_INFO_THROTTLE(1.0, "Control outputs X: %.3f", x_output);
+        ROS_INFO_THROTTLE(1.0, "Control outputs Y: %.3f", y_output);
+        ROS_INFO_THROTTLE(1.0, "Control outputs Z: %.3f", z_output);
+    }
     // Set position commands
     geometry_msgs::PoseStamped control_command;
     control_command.header.stamp    = current_time;

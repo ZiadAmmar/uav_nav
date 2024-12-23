@@ -31,6 +31,7 @@ private:
     double integral_threshold_;
     double max_x_derivative_, max_y_derivative_, max_z_derivative_;
     double derivative_filter_alpha_;
+    bool debug_;
 
     // ROS NodeHandle for parameter server access
     ros::NodeHandle nh_;

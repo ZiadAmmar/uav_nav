@@ -1,7 +1,7 @@
 <launch>
 
     <rosparam command="load" file="$(find uav_nav)/config/controller.yaml" />
-
+    <param name="pid_control/debug" value="true" />
     <node name="pid_test_node" pkg="uav_nav" type="pid_test_node" output="screen"/>
 
 </launch>
