@@ -10,7 +10,7 @@ FlightController::FlightController()
       PIDControl_enabled_(true)
 {
     // Initialize ROS communications
-    // Publishers
+    // Publishers - TOFIX
     local_pos_pub_ = nh_.advertise<geometry_msgs::PoseStamped>
         ("mavros/setpoint_position/local", 10);
     attitude_target_pub_ = nh_.advertise<mavros_msgs::AttitudeTarget>

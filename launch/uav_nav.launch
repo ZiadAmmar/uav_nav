@@ -1,18 +1,23 @@
 <launch>
+    <!--TODO: Camera Pose Publisher  -->
+    <!--TODO: initiate position of uav in simulator.xml to 0.0 0.0 0.0  -->
+
     <!-- Load parameters -->
     <rosparam command="load" file="$(find uav_nav)/config/navigation.yaml" />
     <rosparam command="load" file="$(find uav_nav)/config/controller.yaml" />
     
+    <!-- Remap Topics -->
+    <remap from="/state_ukf/odom" to="/mavros/local_position/odom"/>
+    <remap from="/pcl_render_node/camera_pose" to="/camera/pose"/>
+    <remap from="/pcl_render_node/depth" to="/camera/depth/image_raw"/>
+    
     <!-- Launch Fast Planner using kino_replan -->
-    <include file="$(find uav_nav)/launch/kino_replan.launch">
-        <remap from="/odom_world" to="/mavros/local_position/pose" />
-        <remap from="/position_cmd" to="/fast_planner/position_cmd" />
-    </include>
-
-    <!-- For Map Visualization -->
+    <include file="$(find plan_manage)/launch/kino_replan.launch"/>
+    
     <!-- Run Map server node  -->
     <arg name="map_file" default="$(find uav_nav)/maps/map.yaml"/>
     <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+    
     <!-- Fix Tf tree -->
     <node pkg="tf2_ros" type="static_transform_publisher" name="world_to_map" args="0 0 0 0 0 0 1 /world /map" />
     <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom" args="0 0 0 0 0 0 1 /map /odom" />
