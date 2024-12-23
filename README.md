@@ -64,7 +64,7 @@ All launch files should be executed after the main simulation launch:
    - Launches pid_test_control node
 
 2. `fast_planner_test.launch`
-   - Tests FastPlanner integration
+   - Tests FastPlanner Trajectory Planner
 
 3. `uav_nav.launch`
    - Main launch file
