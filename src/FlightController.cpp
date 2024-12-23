@@ -198,6 +198,7 @@ void FlightController::executeArming() {
 }
 
 void FlightController::executeWaitForPlanner() {
+    //TO FIX Planner Timeout error
     static const ros::Duration PLANNER_TIMEOUT(15.0);
     static bool waypoints_published = false;
 
