@@ -78,46 +78,46 @@ public:
     void setupTestPositions() {
         geometry_msgs::PoseStamped pos;
         pos.pose.orientation.w = 1.0;
-        float altitude = 1.5;
-        // Takeoff position
+        float altitude = 1.3;
+        // // Takeoff position
         pos.pose.position.x = current_pose_.pose.position.x;
         pos.pose.position.y = current_pose_.pose.position.y;
-        pos.pose.position.z = altitude;  // 1.5 meters height
+        pos.pose.position.z = altitude;  
         test_positions_.push_back(pos);
         
         // Chandelier_01_004
         pos.pose.position.x = 1.221061;
-        pos.pose.position.x = -1.592040;
+        pos.pose.position.y = -1.592040;
         pos.pose.position.z = altitude;
         test_positions_.push_back(pos);
         
         // Chandelier_01_003
         pos.pose.position.x = 7.824061;
-        pos.pose.position.x = -1.59;
+        pos.pose.position.y = -1.59;
         pos.pose.position.z = altitude;
         test_positions_.push_back(pos);
 
         // Chandelier_01_004
         pos.pose.position.x = 1.221061;
-        pos.pose.position.x = -1.592040;
+        pos.pose.position.y = -1.592040;
         pos.pose.position.z = altitude;
         test_positions_.push_back(pos);
         
         // Chandelier_01_001
         pos.pose.position.x = 1.221061;
-        pos.pose.position.x = 4.155740 ;
+        pos.pose.position.y = 4.155740 ;
         pos.pose.position.z = altitude;
         test_positions_.push_back(pos);
 
         // Chandelier_01_004
         pos.pose.position.x = 1.221061;
-        pos.pose.position.x = -1.592040;
+        pos.pose.position.y = -1.592040;
         pos.pose.position.z = altitude;
         test_positions_.push_back(pos);
 
         // Chandelier_01_002
         pos.pose.position.x = -6.451061;
-        pos.pose.position.x = -0.692040;
+        pos.pose.position.y = -0.692040;
         pos.pose.position.z = altitude;
         test_positions_.push_back(pos);
         
